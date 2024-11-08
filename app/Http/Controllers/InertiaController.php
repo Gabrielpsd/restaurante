@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Pessoa;
 use App\Models\Produto;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -11,24 +12,65 @@ class InertiaController extends Controller
 {
     public function mesas(){
         $sql = <<<SQL
-            select 
-                mesas.id,
-                mesas.status,
-                mesas."quantidadePessoas",
-                123.22 as "valorAtual",
+            select distinct on (1)
+                pedido_cab.id_mesa,
+                pedido_cab.pedido_aberto,
+                round(cast((select sum(pedido_det.quantidade * pedido_det.preco) from pedido_det where pedido_det.id_pedido = pedido_cab.id) as numeric),2)as valor_total,
                 garcom.nome as garcom,
                 cliente.nome as cliente
-            from mesas 
+            from pedido_cab 
             join pessoas cliente  on 
-                cliente.id = mesas.cliente
+                cliente.id = pedido_cab.id_cliente
             join pessoas garcom on 
-                garcom.id = mesas.garcom
+                garcom.id = pedido_cab.id_funcionario
+            group by pedido_cab.id_mesa,pedido_cab.pedido_aberto,garcom.nome,garcom.nome,garcom.nome,valor_total
         SQL;
     
         $mesas = DB::select($sql);
 
         return Inertia::render('Mesas/list',[
             "Mesas" => $mesas
+        ]);
+    }
+
+    public function editarPedido(string $id)
+    {
+        $sql = <<<SQL
+            select 
+                pedido_cab.id,
+                pedido_cab.id_mesa,
+                pedido_cab.pedido_aberto,
+                round(cast((select sum(pedido_det.quantidade * pedido_det.preco) from pedido_det where pedido_det.id_pedido = pedido_cab.id)as numeric),2) as valor_total,
+                garcom.nome as garcom,
+                cliente.nome as cliente
+            from pedido_cab 
+            join pessoas cliente  on 
+                cliente.id = pedido_cab.id_cliente
+            join pessoas garcom on 
+                garcom.id = pedido_cab.id_funcionario
+            where pedido_cab.id = $id
+        SQL;
+
+        $pedido = DB::select($sql);
+
+        $sql = <<<SQL
+            select 
+                produtos.descricao,
+                pedido_det.* 
+            from 
+                pedido_det 
+            join produtos on 
+                produtos.id = pedido_det.id_produto
+            where 
+                pedido_det.id_pedido = $id
+        SQL;
+
+        $Produtos = DB::select($sql);
+
+        return Inertia::render('Pedidos/edit',
+        [
+            'PedidoBD'=>$pedido,
+            'ProdutosBD'=>$Produtos
         ]);
     }
 
@@ -39,11 +81,54 @@ class InertiaController extends Controller
             "Produtos" => $produtos
         ]);
     }
-    public function editar(Request $request , string $id)
+
+    public function editarProduto(Request $request , string $id)
     {
         $produto = Produto::findOrFail($id);
         $produto->update($request->all());
 
         return response()->json($produto);
     }
+    
+    public function pessoas(){
+        $pessoas = Pessoa::all();
+        
+        return Inertia::render('Pessoas/list',[
+            'Pessoas' => $pessoas
+        ]);
+    }
+
+    public function editarPessoa(Request $request , string $id)
+    {
+        $pessoa = Pessoa::findOrFail($id);
+        $pessoa->update($request->all());
+    
+        return response()->json($pessoa);
+    }
+
+    public function listaPedidos(){
+        $sql = <<< sql
+            select
+                pedido_cab.id,
+                pedido_cab.id_cliente,
+                pessoa.nome as cliente,
+                pedido_cab.id_funcionario,  
+                pessoa2.nome as garcom  ,
+                (select sum(pedido_det.quantidade * pedido_det.preco) from pedido_det where pedido_det.id_pedido = pedido_cab.id) as valor_total,
+                pedido_cab.id_mesa,
+                pedido_cab.pedido_aberto
+            from pedido_cab
+            join pessoas pessoa on 
+                pedido_cab.id_cliente = pessoa.id
+            join pessoas pessoa2 on 
+                pedido_cab.id_funcionario = pessoa2.id
+        sql;
+
+        $pedidos = DB::select($sql);
+
+        return Inertia::render('Pedidos/list',
+                ['Pedidos' => $pedidos]
+        );
+    }
+
 }

@@ -20,16 +20,15 @@
 <template>
     <div class="card border-dark mb-3" style="max-width: 18rem;" >
         <div class="card-header spacing">
-            Mesa {{ mesa.id }}
-            <Link type="button" class="btn btn-secondary btn-sm" :href="`/mesas/${mesa.id}`">Visualizar Pedidos</Link>
-            <span class="busy_dot" v-if=" mesa.status"></span>
-            <span class="free_dot" v-if=" !mesa.status"></span>
+            Mesa {{ mesa.id_mesa }}
+            <Link type="button" class="btn btn-secondary btn-sm" :href="`/mesas/${mesa.id}`">Visualizar Mesa</Link>
+            <span class="busy_dot" v-if=" !mesa.pedido_aberto"></span>
+            <span class="free_dot" v-if=" mesa.pedido_aberto"></span>
         </div>
         <div class="card-body text-dark">
         <h5 class="card-title">Cliente: {{mesa.cliente}}</h5>
         <p class="card-text">Garçom: {{ mesa.garcom }}</p>
         <div class="total">
-            <p class="card-text">Pessoas: {{ mesa.quantidadePessoas }}</p>
             <p class="card-text">Total: R${{ mesa.valorAtual }}</p>
         </div>
   </div>
