@@ -23,7 +23,7 @@ class InertiaController extends Controller
                 cliente.id = pedido_cab.id_cliente
             join pessoas garcom on 
                 garcom.id = pedido_cab.id_funcionario
-            group by pedido_cab.id_mesa,pedido_cab.pedido_aberto,garcom.nome,garcom.nome,garcom.nome,valor_total
+            group by pedido_cab.id_mesa,pedido_cab.pedido_aberto,garcom.nome,cliente.nome,valor_total
         SQL;
     
         $mesas = DB::select($sql);

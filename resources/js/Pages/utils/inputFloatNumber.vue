@@ -5,63 +5,71 @@
         },
         data(){
             return{
-                inputNumber:(this.number + '').replace(/[\.]/,','),
+                inputNumber: new Intl
+                    .NumberFormat(
+                        'pt-BR',
+                        {minimumFractionDigits: 2})
+                    .format(this.number)
             }
         },
         methods:{
-            updateNumber(){
-                this.$emit('update:number',parseInt(this.inputNumber))
+            updateNumber(number){
+                this.$emit('update:number',number)
+                this.$emit('atualiza')
             },
-            formataNumeroParaBrasileira(number){
+        
+            formataParaBrasil(number){
+                number  = number + ''
+                number  = parseFloat(number.replace('.','').replace(',','.'))
 
-                 number = number + ''
-                 number = number.replace(',','.')
-                 let validador = parseFloat(number)
-                 number = number.replace(/[\.,]/,'')
+                this.updateNumber(number)
+                /*formata o numero para o padrão brasileiro */ 
+                let numeroFormatado =  new Intl
+                    .NumberFormat(
+                        'pt-BR',
+                        {minimumFractionDigits: 2})
+                    .format(number)
 
-                 if(validador < 1)
-                 {
-                     number = '0' +  ',' + (number + '').slice(-2)
-                     console.log(number)
-                    }
-                    else 
-                    {
-                        number = number + ''
-                        number = number.substring(0,number.length -2) + ',' + number.slice(-2)
-                        console.log(number)
-                 }
-                 return number
+                return numeroFormatado
             },
-            verificaDigito(key) {
-                console.log(key)
+
+            verificaDigito(key) { 
+
                 if(key.code == "Tab")
                     return
 
+                if(parseInt(key.key) >= 0 && parseInt(key.key) <= 9)
+                {   
+                    let numbers = (this.inputNumber+'').split(',')
+                    numbers = numbers[0]+numbers[1].charAt(0) + ',' + numbers[1].charAt(1) + key.key
+                    this.inputNumber = this.formataParaBrasil(numbers)
+                }
+
                 if(key.code == 'Backspace')
                 {
+                    key.preventDefault()
 
-                    if(parseFloat((this.inputNumber).replace(',','.') <= 0.00))
+                    if(parseFloat((this.inputNumber).replace(/[\.,]/,'')) <= 0.00)
+                    {
+                        return
+                    } 
+
+                    /* divide a strin entre parte inteira e centavos depois remonta a string */ 
+                    let number = (this.inputNumber + '').split(',')
+                    if(number[0].length <= 1)
+                        number = '0' + ',' + number[0].slice(-1) + number[1].charAt(0)
+                    else
+                        number = number[0].slice(0,-1) + ',' + number[0].slice(-1) + number[1].charAt(0)
+                    
+                    this.inputNumber = this.formataParaBrasil(number)
                     return
-                    
-                    let number = (this.inputNumber+'').replace(',','')
-                    console.log(number)
-                    if(number.length <= 2 )
-                        number  = '0' + ',' + number.slice(0,number.length-2)
-                    else 
-                        number = number.substring(0,number.length -2) + ',' + number.slice(-2)
-                    
-                    this.inputNumber = number
-                    return 
                 }
 
-                if(parseInt(key.key) >= 0 && parseInt(key.key) <= 9)
+                if([37,38,39,40].indexOf(key.key) != -1)
                 {
-                    let number = (this.inputNumber + '').replace(/[\D\s\._]/,'')
-                    number = number + key.key
-                    number = this.formataNumeroParaBrasileira(number)
-                
-                   this.inputNumber = number
+                    return
                 }
+
                 key.preventDefault()
                 key.stopPropagation()
             },

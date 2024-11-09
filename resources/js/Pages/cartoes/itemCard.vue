@@ -2,6 +2,7 @@
 <script>
 import inputIntNumber from '../utils/inputIntNumber.vue';
 import inputFloatNumber from '../utils/inputFloatNumber.vue';
+import inputFloatNumberDisable from '../utils/inputFloatNumberDisable.vue'
 
 export default{
     name: "Item",
@@ -10,17 +11,20 @@ export default{
     },
     components:{
         inputIntNumber,
-        inputFloatNumber
+        inputFloatNumber,
+        inputFloatNumberDisable
     },
     data(){
         return{
             descricao: this.produto.descricao,
             preco: this.produto.preco,
-            quantidade: this.produto.quantidade
+            quantidade: this.produto.quantidade,
+            precoTotal: 0,
         }
     },
     computed:{
         atualizaValores(){
+            this.atualizaPrecoTotal()
             this.updatePreco()
             this.updateQuantidade()
         }
@@ -30,19 +34,17 @@ export default{
             this.$emit('update:preco',this.preco)
         },
         updateQuantidade(){
-            if(NaN(this.quantidade) || !this.quantidade)
+            if(isNaN(this.quantidade) || !this.quantidade)
             {
                 this.quantidade = 0
             }
             this.$emit('update:quantidade',this.quantidade)
         },
         atualizaPrecoTotal(){
-            return parseFloat(this.preco) * parseInt(this.quantidade)
+            let resultado = (parseFloat(this.preco) * parseInt(this.quantidade)) + ''
+            this.precoTotal = resultado
         },
-        imprimeValor(){
-            console.log(this.quantidade)
-        }
-    }
+    },
 }
 </script>
 
@@ -53,21 +55,19 @@ export default{
             <div class="d-flex justify-content-between">
             <div class="rounded border border-secondary padding" >
                 Quantidade:
-                <inputIntNumber :number="quantidade" v-model:number="quantidade"></inputIntNumber>
+                <inputIntNumber :number="quantidade" v-model:number="quantidade" @atualiza="atualizaValores"></inputIntNumber>
             </div> 
             <div class="rounded border border-secondary padding" >
                 Preço:
                 <div>
                     R$
-                    <inputFloatNumber :number="preco" v-model:preco="preco"></inputFloatNumber>
+                    <inputFloatNumber :number="preco" v-model:number="preco" @atualiza="atualizaValores"></inputFloatNumber>
                 </div>
             </div>
             <div class="rounded border border-secondary padding" > 
                 Total:
                 <div>
-                    <label>
-                        <input :placeholder="'R$' + atualizaPrecoTotal()" data-slots="_" data-accept="\d" size="5" disabled>
-                    </label>
+                    <inputFloatNumberDisable :number="this.precoTotal" :key="precoTotal"></inputFloatNumberDisable>
                 </div>
             </div>
         </div>

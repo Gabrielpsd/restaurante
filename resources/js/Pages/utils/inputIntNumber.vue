@@ -6,9 +6,7 @@
         methods:{
             updateNumber(){
                 this.$emit('update:number',parseInt(this.inputNumber))
-            },
-            imprimeValor(){
-                console.log(this.inputNumber)
+                this.$emit('atualiza')
             },
             verificaDigito(key) {
                 if(key.code == "Tab")
@@ -24,6 +22,12 @@
                     {
                         this.inputNumber = parseInt((this.inputNumber*10)+parseInt(key.key))
                     }
+                    this.updateNumber()
+                    return
+                }
+
+                if([37,38,39,40].indexOf(key.key) != -1)
+                {
                     return
                 }
 
