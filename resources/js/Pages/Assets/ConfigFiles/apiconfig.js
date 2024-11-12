@@ -9,14 +9,14 @@ export default {
         lista: PRODUTOS,
         detalhe: (produtId) => `${PRODUTOS}/${produtId}`,
         novo: `${PRODUTOS}/novo`,
-        edit: `${PRODUTOS}/edit`
+        edit: `${PRODUTOS}/editar`
     },
     pedidos: {
         lista: PEDIDOS,
         detalhe: (pedido) => `${PEDIDOS}/editar/${pedido}`,
-        removeDet: `${PEDIDOS}/removeDet`,
-        insere: `${PEDIDOS}/insere`,
-        editaEntrada: `${PEDIDOS}/EditaEntrada`
+        remover: (pedido) => `${PEDIDOS}/removerProdutosPedido/${pedido}`,
+        adicionar: (pedido) => `${PEDIDOS}/inserirProdutos/${pedido}`,
+        editar: (pedido) => `${PEDIDOS}/editarProdutoPedido/${pedido}`,
     },
     fornecedores: {
         lista: FORNECEDORES
@@ -24,6 +24,9 @@ export default {
     pessoas:{
         lista: PESSOAS,
         editaPessoa: `${PESSOAS}/editar`
+    },
+    FLAG: {
+        VERDADEIRO: 1,
+        FALSO: 0
     }
-    
 }

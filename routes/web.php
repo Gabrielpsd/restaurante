@@ -18,6 +18,9 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [InertiaController::class,'mesas']);
 Route::get('/pedidos', [InertiaController::class,'listaPedidos']);
 Route::get('/pedidos/editar/{id}', [InertiaController::class,'editarPedido']);
+Route::post('/pedidos/inserirProdutos/{id}',[InertiaController::class,'inserirProdutos']);
+Route::post('/pedidos/editarProdutoPedido/{id}',[InertiaController::class,'editarProdutoPedido']);
+Route::post('/pedidos/removerProdutosPedido/{id}',[InertiaController::class,'removerProdutosPedido']);
 
 /*produtos */
 Route::get('/produtos', [InertiaController::class,'produtos']);

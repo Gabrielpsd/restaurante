@@ -1,7 +1,9 @@
 <script>
     export default{
         props:{
-            number: Number
+            number: {
+                required: true
+            }
         },
         data(){
             return{

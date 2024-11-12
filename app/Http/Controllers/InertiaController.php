@@ -42,7 +42,8 @@ class InertiaController extends Controller
                 pedido_cab.pedido_aberto,
                 round(cast((select sum(pedido_det.quantidade * pedido_det.preco) from pedido_det where pedido_det.id_pedido = pedido_cab.id)as numeric),2) as valor_total,
                 garcom.nome as garcom,
-                cliente.nome as cliente
+                cliente.nome as cliente,
+                pedido_cab.pedido_aberto
             from pedido_cab 
             join pessoas cliente  on 
                 cliente.id = pedido_cab.id_cliente
@@ -66,11 +67,13 @@ class InertiaController extends Controller
         SQL;
 
         $Produtos = DB::select($sql);
+        $produtosCadastrados = Produto::all();
 
         return Inertia::render('Pedidos/edit',
         [
             'PedidoBD'=>$pedido,
-            'ProdutosBD'=>$Produtos
+            'ProdutosBD'=>$Produtos,
+            'ProdutosCadastrados'=> $produtosCadastrados
         ]);
     }
 
@@ -129,6 +132,62 @@ class InertiaController extends Controller
         return Inertia::render('Pedidos/list',
                 ['Pedidos' => $pedidos]
         );
+    }
+
+    public function inserirProdutos(Request $request , string $id)
+    {
+        $sql = <<< SQL
+            insert into 
+                pedido_det (id_produto,id_pedido,quantidade,preco) 
+            values 
+                (?,$id,?,?);
+        SQL;
+
+        foreach($request->request as $pedido)
+        {
+            DB::select($sql,[$pedido['id'],$pedido['quantidade'],$pedido['preco']]);
+        }
+
+        return response()->json('Sucesso nas inserções');
+    }
+
+    public function editarProdutoPedido(Request $request , string $id)
+    {
+        $sql = <<< SQL
+            update 
+                pedido_det 
+            set
+                quantidade = ? ,
+                preco = ?
+            where 
+                id = ? and id_pedido = ?
+        SQL;
+
+        foreach($request->request as $pedido)
+        {
+            if(isset($pedido['id']))
+                DB::update($sql,[$pedido['quantidade'],$pedido['preco'],$pedido['id'],$id]);
+        }
+
+        return response()->json('Sucesso nas alterações');
+    }
+
+    public function removerProdutosPedido(Request $request , string $id)
+    {
+        $sql = <<< SQL
+            delete from 
+                pedido_det 
+            where 
+                id = ? and id_pedido = ?
+        SQL;
+
+        foreach($request->request as $pedido)
+        {
+            if(isset($pedido['id']))
+                DB::update($sql,[$pedido['id'],$id]);
+        }
+
+        return response()->json('Sucesso nas remoções');
     }
 
 }

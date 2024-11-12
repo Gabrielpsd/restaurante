@@ -23,7 +23,6 @@
                         this.inputNumber = parseInt((this.inputNumber*10)+parseInt(key.key))
                     }
                     this.updateNumber()
-                    return
                 }
 
                 if([37,38,39,40].indexOf(key.key) != -1)
